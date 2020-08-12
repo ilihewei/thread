@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.IntStream;
 
 /**
  * 传统上，我们可以通过synchronized关键字+Wait+notify/notifyAll
@@ -17,8 +18,18 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class MyTest2 {
 
+    public static void main(String[] args) {
+        BoundedContainer boundedContainer = new BoundedContainer();
+        IntStream.range(0,5).forEach(i->new Thread(()->{
+           boundedContainer.getTake();
+        }).start());
 
 
+        IntStream.range(0,10).forEach(i->new Thread(()->{
+            boundedContainer.getPut("hello");
+        }).start());
+
+    }
 }
 
 class BoundedContainer{
