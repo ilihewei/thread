@@ -1,5 +1,10 @@
 package com.lihewei.concurrency4;
 
+import java.util.Arrays;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * 传统上，我们可以通过synchronized关键字+Wait+notify/notifyAll
  * 来实现多个线程之间的协调与通信，整个过程都是由jvm来帮助我们实现，开发者无需（也是无法）了解底层的实现细节
@@ -13,5 +18,70 @@ package com.lihewei.concurrency4;
 public class MyTest2 {
 
 
+
+}
+
+class BoundedContainer{
+
+    private  String[] elements=new String[10];
+
+    private  Lock lock=new ReentrantLock();
+
+    private Condition notEmptyCondition=lock.newCondition();
+
+    private Condition notFullCondition=lock.newCondition();
+
+    //elements的值得数量
+    private  int elementCount;
+
+
+    private  int putIndex;
+
+    private int takeIndex;
+
+    public  void getPut(String element){
+        this.lock.lock();
+        try {
+            while (this.elementCount==this.elements.length){
+                notFullCondition.await();
+            }
+            elements[putIndex]=element;
+
+            if (++putIndex==this.elements.length){
+                putIndex=0;
+            }
+
+            ++elementCount;
+            System.out.println("put method===>"+ Arrays.toString(elements));
+            notEmptyCondition.signal();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            this.lock.unlock();
+        }
+
+    }
+
+    public  void getTake(){
+        this.lock.lock();
+        try {
+            while (this.elementCount==0){
+                notEmptyCondition.await();
+            }
+
+            String element=elements[takeIndex];
+            elements[takeIndex]=null;
+            if (takeIndex++==this.elements.length){
+                takeIndex=0;
+            }
+            --elementCount;
+            System.out.println("take method==>"+Arrays.toString(elements));
+            notFullCondition.signal();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            this.lock.unlock();
+        }
+    }
 
 }
