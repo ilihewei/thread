@@ -1,6 +1,7 @@
 package com.lihewei.concurrency5;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 /**
@@ -24,7 +25,7 @@ public class MyTest1 {
 
         try {
             //减少到0才会调用这个方法
-            countDownLatch.await();
+            countDownLatch.await(20, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
