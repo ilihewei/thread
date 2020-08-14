@@ -3,6 +3,9 @@ package com.lihewei.concurrency5;
 import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 /**
  * CyclicBarrier
  * 个人理解：CountDownLatch:我把他理解成倒计时锁
@@ -24,6 +27,15 @@ import java.util.concurrent.CyclicBarrier;
  * 抽象图：
  *
  *  解放军叔叔完美配合，一个都不能少，继续完成任务。
+ *
+ *
+ *  关于cyclicBarrier的底层执行流程
+ *  1。初始化cycliebarrier中的各种成员变量，包括parties，count以及runbale（可选）
+ *  2。当调用await方法时，底层会先检查计数器是否归0，如果是零的话，那么就首先执行可选的runnable，接下来开始一个generation
+ *  3。在下一个分代中，将会重置count值为parties，并且会创建新的generation实例
+ *  4。同时会调用Condioion的signAll方法，唤醒所有在屏障前面等待的线程，让其开始继续执行
+ *  5。如果计数器没有归零，那么当前的调用线程将会通过condition的await方法，在屏障钱进行等待
+ *  6。以上所有的执行流程均在lock锁的控制范围内，不会出现并发情况。
  */
 public class MyTest2 {
     public static void main(String[] args) {
@@ -39,7 +51,11 @@ public class MyTest2 {
                         int nextInt = new Random().nextInt(500);
                         System.out.println("hello====" + nextInt);
                         try {
-                            cyclicBarrier.await();
+                            try {
+                                cyclicBarrier.await(20, TimeUnit.MILLISECONDS);
+                            } catch (TimeoutException e) {
+                                e.printStackTrace();
+                            }
                             System.out.println("world=====" + nextInt);
                         } catch (BrokenBarrierException e) {
                             e.printStackTrace();
