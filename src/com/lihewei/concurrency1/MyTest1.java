@@ -1,7 +1,4 @@
-package com.lihewei.concurrency;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+package com.lihewei.concurrency1;
 
 /**
  * 当调用wait方法时，线程必须要持有被调用对象的锁
