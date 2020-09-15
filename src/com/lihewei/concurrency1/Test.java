@@ -1,4 +1,4 @@
-package com.lihewei.concurrency;
+package com.lihewei.concurrency1;
 
 public class Test {
     public static void main(String[] args) {
